@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  database:
+    build: database
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+  front:
+    build: front
+    ports:
+      - 5555:3000
+    tty: true
+    volumes:
+      - ./front/app:/app
+  server:
+    build: server
+    environment:
+      SEQUELIZE_DATABASE_URL: ${SEQUELIZE_DATABASE_URL}
+    tty: true
+    ports:
+      - 7777:4000
+    volumes:
+      - ./server/app:/app
