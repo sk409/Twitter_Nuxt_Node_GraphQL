@@ -1,17 +1,10 @@
 const models = require("../sequelize/models");
+const RepositorySequelize = require("./repository-sequelize");
 
-const userRepositorySequelize = {
-  findById(id) {
-    return models.User.findByPk(id);
-  },
-  save(name, nickname, email, password) {
-    return models.User.build({
-      name,
-      nickname,
-      email,
-      password
-    }).save();
+class UserRepositorySequelize extends RepositorySequelize {
+  constructor() {
+    super(models.User);
   }
-};
+}
 
-module.exports = userRepositorySequelize;
+module.exports = new UserRepositorySequelize();

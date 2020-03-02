@@ -3,11 +3,11 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return Promise.all([
-      queryInterface.addConstraint("tweets", ["user_id"], {
+      queryInterface.addConstraint("Tweets", ["userId"], {
         type: "foreign key",
         name: "users_tweets_foreign",
         references: {
-          table: "users",
+          table: "Users",
           field: "id"
         },
         onDelete: "cascade",
@@ -18,8 +18,8 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     return [
-      await queryInterface.removeConstraint("tweets", "users_tweets_foreign"),
-      await queryInterface.removeIndex("tweets", "users_tweets_foreign")
+      await queryInterface.removeConstraint("Tweets", "users_tweets_foreign"),
+      await queryInterface.removeIndex("Tweets", "users_tweets_foreign")
     ];
   }
 };

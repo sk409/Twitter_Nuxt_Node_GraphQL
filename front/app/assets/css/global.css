@@ -1,0 +1,39 @@
+.bold {
+  font-weight: bold;
+}
+
+.link {
+  color: rgb(67, 142, 208);
+  cursor: pointer;
+}
+
+.outline-none {
+  outline: none;
+}
+
+.p-relative {
+  position: relative;
+}
+
+.resize-none {
+  resize: none;
+}
+
+.rounded {
+  border-radius: 9999px;
+}
+
+.tweet-text {
+  white-space: pre;
+  white-space: pre-wrap;
+  white-space: pre-line;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -hp-pre-wrap;
+  word-wrap: break-word;
+}
+
+.w-100 {
+  width: 100%;
+}
