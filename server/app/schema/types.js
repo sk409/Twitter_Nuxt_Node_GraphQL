@@ -1,5 +1,4 @@
 const graphql = require("graphql");
-const { Op } = require("sequelize");
 
 const repositories = require("../repositories");
 
@@ -53,20 +52,41 @@ const TweetType = new GraphQLObjectType({
     },
     user: {
       type: UserType,
-      resolve(parent, _) {
+      resolve(parent) {
         const option = {
           where: { id: parent.userId }
         };
         return userRepository.findOne(option);
       }
     },
+    parent: {
+      type: TweetType,
+      resolve(parent) {
+        if (!parent.parentId) {
+          return null;
+        }
+        const option = {
+          where: { id: parent.parentId }
+        };
+        return tweetRepository.findOne(option);
+      }
+    },
     favorites: {
       type: new GraphQLList(FavoriteType),
-      resolve(parent, _) {
+      resolve(parent) {
         const option = {
           where: { tweetId: parent.id }
         };
         return favoriteRepository.findAll(option);
+      }
+    },
+    reply: {
+      type: new GraphQLList(TweetType),
+      resolve(parent) {
+        const option = {
+          where: { parentId: parent.id }
+        };
+        return tweetRepository.findAll(option);
       }
     }
   })
@@ -102,6 +122,9 @@ const UserType = new GraphQLObjectType({
     subscription: {
       type: new GraphQLList(TweetType),
       args: {
+        newAfter: {
+          type: GraphQLID
+        },
         oldBefore: {
           type: GraphQLID
         },
@@ -113,6 +136,7 @@ const UserType = new GraphQLObjectType({
         const condition = {
           userId: parent.id
         };
+        let orderDirection = "desc";
         if (args.oldBefore && 0 < args.oldBefore) {
           const baselineTweet = await tweetRepository.findOne({
             where: { id: args.oldBefore }
@@ -120,12 +144,21 @@ const UserType = new GraphQLObjectType({
           if (baselineTweet.userId !== parent.id) {
             return;
           }
-          condition.id = { [Op.lt]: baselineTweet.id };
+          condition.id = { $lt: baselineTweet.id };
+        } else if (args.newAfter && 0 < args.newAfter) {
+          const baselineTweet = await tweetRepository.findOne({
+            where: { id: args.newAfter }
+          });
+          if (baselineTweet.userId !== parent.id) {
+            return;
+          }
+          condition.id = { $gt: baselineTweet.id };
+          orderDirection = "asc";
         }
         const tweets = await tweetRepository.findAll({
           where: condition,
           limit: args.limit,
-          order: [["id", "desc"]]
+          order: [["id", orderDirection]]
         });
         return tweets;
       }

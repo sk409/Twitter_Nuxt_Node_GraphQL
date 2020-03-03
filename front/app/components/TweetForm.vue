@@ -6,8 +6,8 @@
           <v-img :src="$serverUrl(user.profileImagePath)"></v-img>
         </v-avatar>
       </div>
-      <div>
-        <TweetInput ref="tweetInput" class="mt-2" :style="tweetInputStyle" @input="input"></TweetInput>
+      <div class="flex-fill">
+        <TweetInput v-model="text" class="mt-2"></TweetInput>
         <div class="d-flex align-center mt-5">
           <div class="d-flex justify-space-between">
             <v-btn icon>
@@ -52,25 +52,9 @@ export default {
   },
   data() {
     return {
-      tweetInputWidth: 0,
+      text: "",
       tweetProgress: 0
     };
-  },
-  computed: {
-    tweetInputStyle() {
-      return {
-        width: this.tweetInputWidth + "px"
-      };
-    }
-  },
-  watch: {
-    user() {
-      this.$nextTick(() => {
-        this.tweetInputWidth =
-          this.$refs.avatarAndTweetInput.clientWidth -
-          this.$refs.avatarContainer.clientWidth;
-      });
-    }
   },
   methods: {
     async create() {
@@ -84,14 +68,12 @@ export default {
           storeTweetGQL
         ),
         variables: {
-          text: this.$refs.tweetInput.$el.textContent,
+          text: this.text,
           userId: this.user.id
         }
       });
-    },
-    input() {
-      this.tweetProgress =
-        (this.$refs.tweetInput.$el.textContent.length / 255) * 100;
+      this.text = "";
+      this.$emit("created");
     }
   }
 };

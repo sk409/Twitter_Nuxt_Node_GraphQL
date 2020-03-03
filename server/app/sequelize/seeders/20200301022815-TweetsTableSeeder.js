@@ -1,6 +1,5 @@
 "use strict";
 
-const repositories = require("../../repositories");
 const faker = require("faker");
 
 module.exports = {
@@ -11,7 +10,8 @@ module.exports = {
       const now = new Date();
       data.push({
         text: faker.lorem.sentence(),
-        userId: 1,
+        userId: 101,
+        parentId: null,
         createdAt: now,
         updatedAt: now
       });

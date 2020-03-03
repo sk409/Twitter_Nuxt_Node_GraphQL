@@ -59,6 +59,9 @@ const tweetQueries = {
         },
         userId: {
           type: new GraphQLNonNull(GraphQLID)
+        },
+        parentId: {
+          type: GraphQLID
         }
       },
       resolve(_, args) {

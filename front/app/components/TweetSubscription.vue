@@ -7,7 +7,7 @@
             <v-img :src="$serverUrl(tweet.user.profileImagePath)"></v-img>
           </v-avatar>
         </div>
-        <TweetView :tweet="tweet" :user="user" class="body pl-4 pr-2" @update:tweet="u"></TweetView>
+        <TweetView :tweet="tweet" :user="user" class="body pl-4 pr-2" @update:tweet="updateTweet"></TweetView>
       </div>
       <v-divider></v-divider>
     </div>
@@ -22,8 +22,33 @@ import query from "@/apollo/query.js";
 import TweetView from "@/components/TweetView.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
+
+const fetchSize = 30;
+const tweetParams = [
+  "id",
+  "text",
+  {
+    user: {
+      params: ["name", "nickname", "profileImagePath"]
+    }
+  },
+  {
+    favorites: {
+      params: ["userId"]
+    }
+  },
+  {
+    reply: {
+      params: ["id"]
+    }
+  }
+];
 export default {
   props: {
+    fetchNew: {
+      type: Boolean,
+      default: false
+    },
     user: {
       required: true,
       validator: v => typeof v === "object" || v === null
@@ -33,28 +58,15 @@ export default {
     TweetView
   },
   apollo: {
-    fetch: {
+    fetchNewTweets: {
       query: query(
-        { id: IDNonNullGQL, limit: IntNonNullGQL, oldBefore: IDNonNullGQL },
+        { id: IDNonNullGQL, limit: IntNonNullGQL, newAfter: IDNonNullGQL },
         user.findOne(
           { id: "id" },
           {
             subscription: {
-              args: { limit: "limit", oldBefore: "oldBefore" },
-              params: [
-                "id",
-                "text",
-                {
-                  user: {
-                    params: ["name", "nickname", "profileImagePath"]
-                  }
-                },
-                {
-                  favorites: {
-                    params: ["userId"]
-                  }
-                }
-              ]
+              args: { limit: "limit", newAfter: "newAfter" },
+              params: tweetParams
             }
           }
         )
@@ -62,12 +74,39 @@ export default {
       variables() {
         return {
           id: this.user.id,
-          limit: 30,
+          limit: fetchSize,
+          newAfter: this.newAfter
+        };
+      },
+      update(data) {
+        this.newTweets = data.user.subscription;
+      },
+      skip() {
+        return !this.user || this.newAfter < 0;
+      }
+    },
+    fetchOldTweets: {
+      query: query(
+        { id: IDNonNullGQL, limit: IntNonNullGQL, oldBefore: IDNonNullGQL },
+        user.findOne(
+          { id: "id" },
+          {
+            subscription: {
+              args: { limit: "limit", oldBefore: "oldBefore" },
+              params: tweetParams
+            }
+          }
+        )
+      ),
+      variables() {
+        return {
+          id: this.user.id,
+          limit: fetchSize,
           oldBefore: this.oldBefore
         };
       },
       update(data) {
-        this.subscription = data.user.subscription;
+        this.oldTweets = data.user.subscription;
       },
       skip() {
         return !this.user;
@@ -76,8 +115,10 @@ export default {
   },
   data() {
     return {
+      newAfter: -1,
+      newTweets: [],
       oldBefore: -1,
-      subscription: null,
+      oldTweets: null,
       tweets: []
     };
   },
@@ -85,8 +126,20 @@ export default {
     onscroll = this.scroll;
   },
   watch: {
-    subscription(newSubscription) {
-      this.tweets = this.tweets.concat(newSubscription);
+    fetchNew() {
+      if (this.tweets.length === 0) {
+        return;
+      }
+      this.newAfter = this.tweets[0].id;
+      this.$apollo.queries.fetchNewTweets.refetch();
+    },
+    newTweets() {
+      const copy = [...this.newTweets];
+      this.tweets = copy.reverse().concat(this.tweets);
+      this.$emit("update:fetchNew", false);
+    },
+    oldTweets() {
+      this.tweets = this.tweets.concat(this.oldTweets);
     }
   },
   methods: {
@@ -99,7 +152,7 @@ export default {
       }
       this.oldBefore = this.tweets[this.tweets.length - 1].id;
     },
-    u(tweet) {
+    updateTweet(tweet) {
       const index = this.tweets.findIndex(t => t.id === tweet.id);
       this.$set(this.tweets, index, tweet);
     }

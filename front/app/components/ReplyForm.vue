@@ -35,7 +35,10 @@
             </v-avatar>
           </div>
           <div class="flex-fill">
-            <TweetInput></TweetInput>
+            <TweetInput v-model="text" placeholder="返信をツイート"></TweetInput>
+            <div class="d-flex">
+              <v-btn color="primary" depressed rounded small class="ml-auto mr-2" @click="create">返信</v-btn>
+            </div>
           </div>
         </div>
       </v-card-text>
@@ -44,7 +47,10 @@
 </template>
 
 <script>
+import mutation from "@/apollo/mutation.js";
+import tweet from "@/apollo/models/tweet.js";
 import TweetInput from "@/components/TweetInput.vue";
+import { IDNonNullGQL, StringNonNullGQL } from "@/apollo/types.js";
 export default {
   props: {
     tweet: {
@@ -58,6 +64,32 @@ export default {
   },
   components: {
     TweetInput
+  },
+  data() {
+    return {
+      text: ""
+    };
+  },
+  methods: {
+    async create() {
+      const storeTweetGQL = mutation(
+        {
+          text: StringNonNullGQL,
+          userId: IDNonNullGQL,
+          parentId: IDNonNullGQL
+        },
+        tweet.store({ text: "text", userId: "userId", parentId: "parentId" })
+      );
+      const response = await this.$apollo.mutate({
+        mutation: storeTweetGQL,
+        variables: {
+          text: this.text,
+          userId: this.user.id,
+          parentId: this.tweet.id
+        }
+      });
+      console.log(response);
+    }
   }
 };
 </script>

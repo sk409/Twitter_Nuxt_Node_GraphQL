@@ -7,9 +7,9 @@
       <v-card flat outlined class="w-100">
         <v-card-title>ホーム</v-card-title>
         <v-divider></v-divider>
-        <TweetForm :user="user"></TweetForm>
+        <TweetForm :user="user" @created="fetchNew=true"></TweetForm>
         <div class="divider mt-2"></div>
-        <TweetSubscription :user="user"></TweetSubscription>
+        <TweetSubscription :fetch-new.sync="fetchNew" :user="user"></TweetSubscription>
       </v-card>
     </div>
     <div class="information"></div>
@@ -42,10 +42,10 @@ export default {
   },
   data() {
     return {
+      fetchNew: false,
       user: null
     };
   },
-  created() {},
   methods: {}
 };
 </script>

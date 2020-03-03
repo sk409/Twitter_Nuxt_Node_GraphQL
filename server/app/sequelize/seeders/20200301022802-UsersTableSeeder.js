@@ -2,6 +2,10 @@
 
 const faker = require("faker");
 
+const constants = require("../../assets/js/constants");
+
+const { noImagePath } = constants;
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     const data = [];
@@ -13,6 +17,7 @@ module.exports = {
         nickname: faker.internet.userName(),
         email: faker.internet.email(),
         password: faker.internet.password(),
+        profileImagePath: noImagePath,
         createdAt: now,
         updatedAt: now
       });

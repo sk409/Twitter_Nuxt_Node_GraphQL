@@ -1,10 +1,13 @@
 const bcrypt = require("bcrypt");
 const graphql = require("graphql");
 
+const constants = require("../assets/js/constants");
 const repositories = require("../repositories");
 const types = require("./types");
 
 const { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLString } = graphql;
+
+const { noImagePath } = constants;
 const { userRepository } = repositories;
 const { UserType } = types;
 
@@ -114,7 +117,7 @@ const userQueries = {
         const hashedPassword = bcrypt.hashSync(args.password, bcryptRounds);
         const data = Object.assign({}, args);
         data.password = hashedPassword;
-        data.profileImagePath = "static/no-image.png";
+        data.profileImagePath = noImagePath;
         const user = await userRepository.save(data);
         req.session.userId = user.id;
         return user;

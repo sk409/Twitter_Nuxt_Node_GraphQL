@@ -55,7 +55,6 @@ const favoriteQueries = {
         const option = {
           where: args
         };
-        console.log(option);
         return favoriteRepository.destory(option);
       }
     },
