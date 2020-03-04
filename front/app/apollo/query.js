@@ -11,7 +11,7 @@ export default function query(args, ...queries) {
         ${queries.join("\n")}
     }
     `;
-  // console.log(g);
+  console.log(g);
   return gql`
     ${g}
   `;

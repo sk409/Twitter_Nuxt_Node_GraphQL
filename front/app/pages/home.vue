@@ -1,9 +1,6 @@
 <template>
-  <v-container class="p-relative">
-    <div class="menu">
-      <HomeMenu :user="user"></HomeMenu>
-    </div>
-    <div class="main">
+  <ScaffoldView>
+    <template v-slot:center>
       <v-card flat outlined class="w-100">
         <v-card-title>ホーム</v-card-title>
         <v-divider></v-divider>
@@ -11,21 +8,20 @@
         <div class="divider mt-2"></div>
         <TweetSubscription :fetch-new.sync="fetchNew" :user="user"></TweetSubscription>
       </v-card>
-    </div>
-    <div class="information"></div>
-  </v-container>
+    </template>
+  </ScaffoldView>
 </template>
 
 <script>
-import HomeMenu from "@/components/HomeMenu.vue";
 import query from "@/apollo/query.js";
+import ScaffoldView from "@/components/ScaffoldView.vue";
 import TweetForm from "@/components/TweetForm.vue";
 import TweetSubscription from "@/components/TweetSubscription.vue";
 import user from "@/apollo/models/user.js";
 export default {
   layout: "auth",
   components: {
-    HomeMenu,
+    ScaffoldView,
     TweetForm,
     TweetSubscription
   },
@@ -54,19 +50,5 @@ export default {
 .divider {
   height: 8px;
   background: rgba(32, 32, 32, 0.1);
-}
-.information {
-  width: 30%;
-}
-.main {
-  width: 50%;
-  position: absolute;
-  top: 0;
-  left: 240px;
-}
-.menu {
-  width: 240px;
-  position: fixed;
-  top: 0;
 }
 </style>

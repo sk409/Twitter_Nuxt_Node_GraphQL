@@ -1,5 +1,9 @@
 <template>
-  <div v-if="tweet" class="d-flex">
+  <div
+    v-if="tweet"
+    class="d-flex"
+    @click="$router.push($routes.tweets.show(tweet.user.id, tweet.id))"
+  >
     <div class="d-flex flex-column header pl-1">
       <v-avatar>
         <v-img :src="$serverUrl(tweet.user.profileImagePath)"></v-img>
@@ -11,15 +15,13 @@
         <span class="subtitle-1">{{ tweet.user.nickname }}</span>
         <span class="caption ml-1">@{{ tweet.user.name }}</span>
       </div>
-      <pre class="body-1 tweet-text">
-            {{ tweet.text }}
-          </pre>
+      <TweetText :text="tweet.text"></TweetText>
       <div class="d-flex justify-space-between my-2 tools">
         <div class="d-flex align-center">
           <v-btn icon x-small @click="dialogReply=true">
             <v-icon>mdi-comment-outline</v-icon>
           </v-btn>
-          <span v-if="tweet.reply.length !== 0" class="ml-1">{{tweet.reply.length}}</span>
+          <span v-if="tweet.replies.length !== 0" class="ml-1">{{tweet.replies.length}}</span>
         </div>
         <v-btn icon x-small>
           <v-icon>mdi-twitter-retweet</v-icon>
@@ -45,6 +47,7 @@
 import favorite from "@/apollo/models/favorite.js";
 import mutation from "@/apollo/mutation.js";
 import ReplyForm from "@/components/ReplyForm.vue";
+import TweetText from "@/components/TweetText.vue";
 import { IDNonNullGQL } from "@/apollo/types.js";
 export default {
   props: {
@@ -62,7 +65,8 @@ export default {
     }
   },
   components: {
-    ReplyForm
+    ReplyForm,
+    TweetText
   },
   data() {
     return {

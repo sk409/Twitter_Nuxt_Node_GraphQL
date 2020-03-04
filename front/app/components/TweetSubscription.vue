@@ -22,7 +22,7 @@ const tweetParams = [
   "text",
   {
     user: {
-      params: ["name", "nickname", "profileImagePath"]
+      params: ["id", "name", "nickname", "profileImagePath"]
     }
   },
   {
@@ -31,7 +31,7 @@ const tweetParams = [
     }
   },
   {
-    reply: {
+    replies: {
       params: ["id"]
     }
   },
@@ -42,7 +42,7 @@ const tweetParams = [
         "text",
         {
           user: {
-            params: ["name", "nickname", "profileImagePath"]
+            params: ["id", "name", "nickname", "profileImagePath"]
           }
         },
         {
@@ -51,7 +51,7 @@ const tweetParams = [
           }
         },
         {
-          reply: {
+          replies: {
             params: ["id"]
           }
         }

@@ -80,8 +80,7 @@ const TweetType = new GraphQLObjectType({
         return favoriteRepository.findAll(option);
       }
     },
-    // TODO: 複数形にする
-    reply: {
+    replies: {
       type: new GraphQLList(TweetType),
       resolve(parent) {
         const option = {
@@ -128,11 +127,6 @@ const TweetType = new GraphQLObjectType({
           if (!child) {
             break;
           }
-          // console.log({
-          //   userId: { $or: [parent.userId, reply.userId] },
-          //   parentId: c[c.length - 1].id
-          // });
-          // console.log(child);
           conversation.push(child);
         }
         return conversation;
