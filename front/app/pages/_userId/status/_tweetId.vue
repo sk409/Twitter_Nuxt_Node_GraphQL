@@ -42,7 +42,13 @@
           </div>
           <v-divider></v-divider>
         </div>
-        <TweetGroupHead v-for="reply in tweet.replies" :key="reply.id" :tweet="reply" :user="user"></TweetGroupHead>
+        <TweetGroupHead
+          v-for="reply in tweet.replies"
+          :key="reply.id"
+          :tweet="reply"
+          :user="user"
+          @fetch-more-replies="fetchMoreReplies"
+        ></TweetGroupHead>
       </v-card>
     </template>
   </ScaffoldView>
@@ -56,6 +62,54 @@ import TweetGroupHead from "@/components/TweetGroupHead.vue";
 import TweetText from "@/components/TweetText.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
+
+const replyParams = conversationArgs => {
+  return [
+    "id",
+    "text",
+    "conversationLength",
+    {
+      user: {
+        params: ["name", "nickname", "profileImagePath"]
+      }
+    },
+    {
+      favorites: {
+        params: ["userId"]
+      }
+    },
+    {
+      replies: {
+        params: ["id"]
+      }
+    },
+    {
+      conversation: {
+        args: conversationArgs,
+        params: [
+          "id",
+          "text",
+          {
+            user: {
+              params: ["id", "name", "nickname", "profileImagePath"]
+            }
+          },
+          {
+            favorites: {
+              params: ["userId"]
+            }
+          },
+          {
+            replies: {
+              params: ["id"]
+            }
+          }
+        ]
+      }
+    }
+  ];
+};
+
 export default {
   layout: "auth",
   components: {
@@ -67,7 +121,7 @@ export default {
     currentUser: {
       query: query(null, user.current("id")),
       update(data) {
-        this.fetchUser = data.currentUser;
+        this.dataCurrentUser = data.currentUser;
       }
     },
     tweet: {
@@ -88,50 +142,7 @@ export default {
           },
           {
             replies: {
-              params: [
-                "id",
-                "text",
-                "conversationLength",
-                {
-                  user: {
-                    params: ["name", "nickname", "profileImagePath"]
-                  }
-                },
-                {
-                  favorites: {
-                    params: ["userId"]
-                  }
-                },
-                {
-                  replies: {
-                    params: ["id"]
-                  }
-                },
-                {
-                  conversation: {
-                    args: { depth: "depth" },
-                    params: [
-                      "id",
-                      "text",
-                      {
-                        user: {
-                          params: ["id", "name", "nickname", "profileImagePath"]
-                        }
-                      },
-                      {
-                        favorites: {
-                          params: ["userId"]
-                        }
-                      },
-                      {
-                        replies: {
-                          params: ["id"]
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
+              params: replyParams({ depth: "depth" })
             }
           }
         )
@@ -143,14 +154,33 @@ export default {
         };
       },
       update(data) {
-        this.fetchTweet = data.tweet;
+        this.dataTweet = data.tweet;
+      }
+    },
+    moreReplies: {
+      query: query(
+        { id: IDNonNullGQL },
+        tweet.findOne({ id: "id" }, ...replyParams())
+      ),
+      variables() {
+        return {
+          id: this.moreRepliesTweetId
+        };
+      },
+      update(data) {
+        this.dataMoreReplies = data.tweet;
+      },
+      skip() {
+        return !this.moreRepliesTweetId;
       }
     }
   },
   data() {
     return {
-      fetchTweet: null,
-      fetchUser: null,
+      dataMoreReplies: null,
+      dataTweet: null,
+      dataCurrentUser: null,
+      moreRepliesTweetId: null,
       tweet: null,
       user: null
     };
@@ -173,11 +203,22 @@ export default {
     }
   },
   watch: {
-    fetchTweet() {
-      this.tweet = this.fetchTweet;
+    dataMoreReplies() {
+      const index = this.tweet.replies.findIndex(
+        reply => reply.id === this.moreRepliesTweetId
+      );
+      this.$set(this.tweet.replies, index, this.dataMoreReplies);
     },
-    fetchUser() {
-      this.user = this.fetchUser;
+    dataTweet() {
+      this.tweet = this.dataTweet;
+    },
+    dataCurrentUser() {
+      this.user = this.dataCurrentUser;
+    }
+  },
+  methods: {
+    fetchMoreReplies(tweet) {
+      this.moreRepliesTweetId = tweet.id;
     }
   }
 };

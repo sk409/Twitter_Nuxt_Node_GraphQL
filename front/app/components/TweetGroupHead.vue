@@ -14,14 +14,27 @@
         @update:tweet="updateTweet"
       ></TweetView>
       <div v-if="2<=tweet.conversationLength">
-        <div v-if="!loading" @click="loading=true" class="d-flex more-replies my-1">
+        <div v-if="!loading" @click="fetchMoreReplies" class="d-flex more-replies my-1">
           <div class="dot-line-container">
             <div class="dot-line"></div>
           </div>
           <div class="link">他{{tweet.conversationLength-1}}件の返信</div>
         </div>
-        <div v-else class="text-center py-2">
+        <div
+          v-else-if="tweet.conversation.length !== tweet.conversationLength"
+          class="text-center py-2"
+        >
           <v-progress-circular color="primary" indeterminate></v-progress-circular>
+        </div>
+        <div v-else>
+          <TweetView
+            v-for="(reply, index) in tweet.conversation.slice(1)"
+            :key="reply.id"
+            :line="index!==tweet.conversation.length-2"
+            :tweet="reply"
+            :user="user"
+            @update:tweet="updateTweet"
+          ></TweetView>
         </div>
       </div>
     </div>
@@ -51,6 +64,10 @@ export default {
     };
   },
   methods: {
+    fetchMoreReplies() {
+      this.loading = true;
+      this.$emit("fetch-more-replies", this.tweet);
+    },
     updateTweet(tweet) {
       this.$emit("update:tweet", tweet);
     }
