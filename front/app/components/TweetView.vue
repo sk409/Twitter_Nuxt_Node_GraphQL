@@ -1,31 +1,39 @@
 <template>
-  <div v-if="tweet" class="body pl-4 pr-2">
-    <div class="d-flex align-center">
-      <span class="subtitle-1">{{ tweet.user.nickname }}</span>
-      <span class="caption ml-1">@{{ tweet.user.name }}</span>
+  <div v-if="tweet" class="d-flex">
+    <div class="d-flex flex-column header pl-1">
+      <v-avatar>
+        <v-img :src="$serverUrl(tweet.user.profileImagePath)"></v-img>
+      </v-avatar>
+      <div v-if="line" class="flex-fill line mx-auto"></div>
     </div>
-    <pre class="body-1 tweet-text">
+    <div class="body pl-4 pr-2">
+      <div class="d-flex align-center">
+        <span class="subtitle-1">{{ tweet.user.nickname }}</span>
+        <span class="caption ml-1">@{{ tweet.user.name }}</span>
+      </div>
+      <pre class="body-1 tweet-text">
             {{ tweet.text }}
           </pre>
-    <div class="d-flex justify-space-between my-2 tools">
-      <div class="d-flex align-center">
-        <v-btn icon x-small @click="dialogReply=true">
-          <v-icon>mdi-comment-outline</v-icon>
+      <div class="d-flex justify-space-between my-2 tools">
+        <div class="d-flex align-center">
+          <v-btn icon x-small @click="dialogReply=true">
+            <v-icon>mdi-comment-outline</v-icon>
+          </v-btn>
+          <span v-if="tweet.reply.length !== 0" class="ml-1">{{tweet.reply.length}}</span>
+        </div>
+        <v-btn icon x-small>
+          <v-icon>mdi-twitter-retweet</v-icon>
         </v-btn>
-        <span v-if="tweet.reply.length !== 0" class="ml-1">{{tweet.reply.length}}</span>
-      </div>
-      <v-btn icon x-small>
-        <v-icon>mdi-twitter-retweet</v-icon>
-      </v-btn>
-      <div class="d-flex align-center">
-        <v-btn icon x-small @click="clickFavorite">
-          <v-icon :style="favoriteIconStyle" v-text="favoriteIconText"></v-icon>
+        <div class="d-flex align-center">
+          <v-btn icon x-small @click="clickFavorite">
+            <v-icon :style="favoriteIconStyle" v-text="favoriteIconText"></v-icon>
+          </v-btn>
+          <span v-if="tweet.favorites.length !== 0" class="ml-1">{{tweet.favorites.length}}</span>
+        </div>
+        <v-btn icon x-small>
+          <v-icon>mdi-upload-outline</v-icon>
         </v-btn>
-        <span v-if="tweet.favorites.length !== 0" class="ml-1">{{tweet.favorites.length}}</span>
       </div>
-      <v-btn icon x-small>
-        <v-icon>mdi-upload-outline</v-icon>
-      </v-btn>
     </div>
     <v-dialog v-model="dialogReply" width="60%">
       <ReplyForm :tweet="tweet" :user="user"></ReplyForm>
@@ -40,6 +48,10 @@ import ReplyForm from "@/components/ReplyForm.vue";
 import { IDNonNullGQL } from "@/apollo/types.js";
 export default {
   props: {
+    line: {
+      type: Boolean,
+      default: false
+    },
     tweet: {
       required: true,
       validator: v => typeof v === "object" || v === null
@@ -123,6 +135,19 @@ export default {
 </script>
 
 <style>
+.body {
+  width: 90%;
+}
+
+.header {
+  width: 10%;
+}
+
+.line {
+  background: lightgrey;
+  width: 2px;
+}
+
 .tools {
   width: 80%;
 }

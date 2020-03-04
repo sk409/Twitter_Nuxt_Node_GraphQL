@@ -22,7 +22,7 @@
               <span class="title">{{tweet.user.nickname}}</span>
               <span class="caption">@{{tweet.user.name}}</span>
             </div>
-            <pre class="tweet-text">{{tweet.text}}{{tweet.text}}</pre>
+            <pre class="tweet-text">{{tweet.text}}</pre>
             <div class="my-3">
               <span class="link">@{{tweet.user.name}}</span>へ返信
             </div>

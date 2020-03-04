@@ -1,14 +1,7 @@
 <template>
   <div>
     <div v-for="tweet in tweets" :key="tweet.id">
-      <div class="d-flex">
-        <div class="header pl-1">
-          <v-avatar>
-            <v-img :src="$serverUrl(tweet.user.profileImagePath)"></v-img>
-          </v-avatar>
-        </div>
-        <TweetView :tweet="tweet" :user="user" class="body pl-4 pr-2" @update:tweet="updateTweet"></TweetView>
-      </div>
+      <TweetGroup :tweet="tweet" :user="user" @update:tweet="updateTweet"></TweetGroup>
       <v-divider></v-divider>
     </div>
     <div class="py-5 text-center">
@@ -19,7 +12,7 @@
 
 <script>
 import query from "@/apollo/query.js";
-import TweetView from "@/components/TweetView.vue";
+import TweetGroup from "@/components/TweetGroup.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
 
@@ -41,8 +34,32 @@ const tweetParams = [
     reply: {
       params: ["id"]
     }
+  },
+  {
+    conversation: {
+      params: [
+        "id",
+        "text",
+        {
+          user: {
+            params: ["name", "nickname", "profileImagePath"]
+          }
+        },
+        {
+          favorites: {
+            params: ["userId"]
+          }
+        },
+        {
+          reply: {
+            params: ["id"]
+          }
+        }
+      ]
+    }
   }
 ];
+
 export default {
   props: {
     fetchNew: {
@@ -55,7 +72,7 @@ export default {
     }
   },
   components: {
-    TweetView
+    TweetGroup
   },
   apollo: {
     fetchNewTweets: {
@@ -159,12 +176,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.header {
-  width: 10%;
-}
-.body {
-  width: 90%;
-}
-</style>

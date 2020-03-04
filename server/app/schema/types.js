@@ -80,6 +80,7 @@ const TweetType = new GraphQLObjectType({
         return favoriteRepository.findAll(option);
       }
     },
+    // TODO: 複数形にする
     reply: {
       type: new GraphQLList(TweetType),
       resolve(parent) {
@@ -87,6 +88,54 @@ const TweetType = new GraphQLObjectType({
           where: { parentId: parent.id }
         };
         return tweetRepository.findAll(option);
+      }
+    },
+    conversation: {
+      type: new GraphQLList(TweetType),
+      args: {
+        depth: {
+          type: GraphQLInt
+        },
+        userId: {
+          type: GraphQLID
+        }
+      },
+      async resolve(parent, args) {
+        const reply = await tweetRepository.findOne({
+          where: { parentId: parent.id },
+          order: [["id", "desc"]]
+        });
+        if (!reply) {
+          return [];
+        }
+        //
+        // if (args.userId) {
+        //   replies = replies.fliter(reply => {
+        //     return reply.userId === args.userId;
+        //   });
+        // }
+        //
+        const depth = args.depth ? args.depth : Number.MAX_SAFE_INTEGER;
+        const conversation = [reply];
+        while (conversation.length < depth) {
+          const child = await tweetRepository.findOne({
+            where: {
+              // userId: { $or: [parent.userId, reply.userId] },
+              parentId: conversation[conversation.length - 1].id
+            },
+            limit: 1
+          });
+          if (!child) {
+            break;
+          }
+          // console.log({
+          //   userId: { $or: [parent.userId, reply.userId] },
+          //   parentId: c[c.length - 1].id
+          // });
+          // console.log(child);
+          conversation.push(child);
+        }
+        return conversation;
       }
     }
   })
@@ -134,7 +183,8 @@ const UserType = new GraphQLObjectType({
       },
       async resolve(parent, args) {
         const condition = {
-          userId: parent.id
+          userId: parent.id,
+          parentId: null
         };
         let orderDirection = "desc";
         if (args.oldBefore && 0 < args.oldBefore) {
