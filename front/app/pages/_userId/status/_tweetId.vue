@@ -42,6 +42,7 @@
           </div>
           <v-divider></v-divider>
         </div>
+        <TweetGroupHead v-for="reply in tweet.replies" :key="reply.id" :tweet="reply" :user="user"></TweetGroupHead>
       </v-card>
     </template>
   </ScaffoldView>
@@ -51,6 +52,7 @@
 import query from "@/apollo/query.js";
 import ScaffoldView from "@/components/ScaffoldView.vue";
 import tweet from "@/apollo/models/tweet.js";
+import TweetGroupHead from "@/components/TweetGroupHead.vue";
 import TweetText from "@/components/TweetText.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
@@ -58,6 +60,7 @@ export default {
   layout: "auth",
   components: {
     ScaffoldView,
+    TweetGroupHead,
     TweetText
   },
   apollo: {
@@ -69,7 +72,7 @@ export default {
     },
     tweet: {
       query: query(
-        { id: IDNonNullGQL },
+        { id: IDNonNullGQL, depth: IntNonNullGQL },
         tweet.findOne(
           { id: "id" },
           "text",
@@ -85,19 +88,58 @@ export default {
           },
           {
             replies: {
-              params: ["id"]
-            }
-          },
-          {
-            conversation: {
-              params: ["text"]
+              params: [
+                "id",
+                "text",
+                "conversationLength",
+                {
+                  user: {
+                    params: ["name", "nickname", "profileImagePath"]
+                  }
+                },
+                {
+                  favorites: {
+                    params: ["userId"]
+                  }
+                },
+                {
+                  replies: {
+                    params: ["id"]
+                  }
+                },
+                {
+                  conversation: {
+                    args: { depth: "depth" },
+                    params: [
+                      "id",
+                      "text",
+                      {
+                        user: {
+                          params: ["id", "name", "nickname", "profileImagePath"]
+                        }
+                      },
+                      {
+                        favorites: {
+                          params: ["userId"]
+                        }
+                      },
+                      {
+                        replies: {
+                          params: ["id"]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           }
         )
       ),
       variables() {
         return {
-          id: 2029
+          id: this.$route.params.tweetId,
+          depth: 1
         };
       },
       update(data) {
@@ -129,9 +171,6 @@ export default {
       );
       return likeThis;
     }
-  },
-  created() {
-    const tweetId = this.$route.params.tweetId;
   },
   watch: {
     fetchTweet() {

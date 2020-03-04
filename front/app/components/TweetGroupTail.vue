@@ -17,7 +17,7 @@
         ></TweetView>
       </div>
       <div v-else>
-        <div class="d-flex my-1">
+        <div class="d-flex more-replies my-1">
           <div class="dot-line-container">
             <div class="dot-line"></div>
           </div>
@@ -42,14 +42,8 @@
 
 <script>
 import TweetView from "@/components/TweetView.vue";
-const strategyHead = "strategyHead";
-const strategyTail = "strategyTail";
 export default {
   props: {
-    strategy: {
-      type: String,
-      default: strategyHead
-    },
     tweet: {
       required: true,
       validator: v => typeof v === "object" || v === null
@@ -61,14 +55,6 @@ export default {
   },
   components: {
     TweetView
-  },
-  computed: {
-    isStrategyHead() {
-      return this.strategy === strategyHead;
-    },
-    isStrategyTail() {
-      return this.strategy === strategyTail;
-    }
   },
   methods: {
     updateTweet(tweet) {
@@ -82,10 +68,15 @@ export default {
 .dot-line-container {
   width: 48px;
 }
+
 .dot-line {
   border: 1px dashed grey;
   margin: 0 auto;
   width: 1px;
   height: 100%;
+}
+
+.more-replies:hover {
+  background: rgb(246, 248, 250);
 }
 </style>

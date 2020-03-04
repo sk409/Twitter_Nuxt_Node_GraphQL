@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="tweet in tweets" :key="tweet.id">
-      <TweetGroup :tweet="tweet" :user="user" @update:tweet="updateTweet"></TweetGroup>
+      <TweetGroupTail :tweet="tweet" :user="user" @update:tweet="updateTweet"></TweetGroupTail>
       <v-divider></v-divider>
     </div>
     <div class="py-5 text-center">
@@ -12,7 +12,7 @@
 
 <script>
 import query from "@/apollo/query.js";
-import TweetGroup from "@/components/TweetGroup.vue";
+import TweetGroupTail from "@/components/TweetGroupTail.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
 
@@ -72,7 +72,7 @@ export default {
     }
   },
   components: {
-    TweetGroup
+    TweetGroupTail
   },
   apollo: {
     fetchNewTweets: {

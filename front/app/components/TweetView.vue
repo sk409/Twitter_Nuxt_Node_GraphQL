@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="tweet"
-    class="d-flex"
+    class="d-flex tweet-view"
     @click="$router.push($routes.tweets.show(tweet.user.id, tweet.id))"
   >
     <div class="d-flex flex-column header pl-1">
@@ -154,5 +154,9 @@ export default {
 
 .tools {
   width: 80%;
+}
+
+.tweet-view:hover {
+  background: rgb(246, 248, 250);
 }
 </style>
