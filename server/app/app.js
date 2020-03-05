@@ -1,10 +1,23 @@
 const cors = require("cors");
+const DataLoader = require("dataloader");
 const express = require("express");
 const graphqlHTTP = require("express-graphql");
 const Sequelize = require("sequelize");
 const session = require("express-session");
 
+const batchGetters = require("./assets/js/batch-getters");
 const schema = require("./schema");
+
+const {
+  conversationBatchGetter,
+  conversationLengthBatchGetter,
+  favoriteBatchGetterByTweetId,
+  subscriptionBatchGetter,
+  tweetBatchGetterById,
+  tweetBatchGetterByParentId,
+  tweetBatchGetterByUserId,
+  userBatchGetterById
+} = batchGetters;
 
 require("dotenv").config();
 
@@ -41,7 +54,18 @@ app.use(
 app.use(
   "/graphql",
   graphqlHTTP((req, res) => ({
-    context: { req, res },
+    context: {
+      req,
+      res,
+      conversationLoader: new DataLoader(conversationBatchGetter),
+      conversationLengthLoader: new DataLoader(conversationLengthBatchGetter),
+      favoriteLoaderByTweetId: new DataLoader(favoriteBatchGetterByTweetId),
+      subscriptionBatchLoader: new DataLoader(subscriptionBatchGetter),
+      tweetLoaderById: new DataLoader(tweetBatchGetterById),
+      tweetLoaderByParentId: new DataLoader(tweetBatchGetterByParentId),
+      tweetLoaderByUserId: new DataLoader(tweetBatchGetterByUserId),
+      userLoaderById: new DataLoader(userBatchGetterById)
+    },
     graphiql: true,
     schema
   }))

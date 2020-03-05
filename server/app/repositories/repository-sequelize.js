@@ -1,23 +1,41 @@
+const _ = require("lodash");
 const { Op } = require("sequelize");
 
 const preprocessing = option => {
   const o = Object.assign({}, option);
   if (o.where) {
-    const keys = Object.keys(o.where);
-    for (const key of keys) {
-      const condition = o.where[key];
-      if (typeof condition !== "object") {
-        continue;
+    const renameOperator = obj => {
+      if (!obj) {
+        return;
       }
-      for (const key2 in condition) {
-        if (key2 === "$lt") {
-          o.where[key] = { [Op.lt]: condition[key2] };
-        } else if (key2 === "$gt") {
-          o.where[key] = { [Op.gt]: condition[key2] };
+      const keys = Object.keys(obj);
+      for (const key of keys) {
+        const condition = obj[key];
+        if (key === "$lt") {
+          obj[Op.lt] = condition;
+          delete obj[key];
+        } else if (key === "$gt") {
+          obj[Op.gt] = condition;
+          delete obj[key];
+        } else if (key === "$in") {
+          obj[Op.in] = condition;
+          delete obj[key];
+        } else if (key === "$or") {
+          obj[Op.or] = condition;
+          delete obj[key];
         }
+        if (typeof condition !== "object") {
+          continue;
+        }
+        renameOperator(condition);
       }
-    }
+      return obj;
+    };
+    // console.log("!!");
+    renameOperator(o.where);
+    // console.log("!!");
   }
+  // console.log(o);
   return o;
 };
 

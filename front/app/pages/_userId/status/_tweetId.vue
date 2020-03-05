@@ -15,28 +15,31 @@
               <v-img :src="$serverUrl(tweet.user.profileImagePath)"></v-img>
             </v-avatar>
             <div class="ml-2">
-              <div class="title">{{tweet.user.nickname}}</div>
-              <div class="caption">{{tweet.user.name}}</div>
+              <div class="title">{{ tweet.user.nickname }}</div>
+              <div class="caption">{{ tweet.user.name }}</div>
             </div>
           </div>
           <TweetText class="tweet-text" :text="tweet.text"></TweetText>
           <v-divider class="mt-2"></v-divider>
           <div class="my-2">
-            <span class="subtitle-1">{{tweet.favorites.length}}</span>
+            <span class="subtitle-1">{{ tweet.favorites.length }}</span>
             <span>いいねの数</span>
           </div>
           <v-divider></v-divider>
           <div class="d-flex justify-space-between my-1 px-5">
-            <v-btn icon>
+            <v-btn icon @click.stop>
               <v-icon>mdi-comment-outline</v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn icon @click.stop>
               <v-icon>mdi-twitter-retweet</v-icon>
             </v-btn>
-            <v-btn icon>
-              <v-icon :style="favoriteIconStyle" v-text="favoriteIconText"></v-icon>
+            <v-btn icon @click.stop>
+              <v-icon
+                :style="favoriteIconStyle"
+                v-text="favoriteIconText"
+              ></v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn icon @click.stop>
               <v-icon>mdi-upload-outline</v-icon>
             </v-btn>
           </div>

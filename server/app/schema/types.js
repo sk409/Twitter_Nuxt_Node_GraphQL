@@ -22,63 +22,18 @@ const FavoriteType = new GraphQLObjectType({
     },
     tweet: {
       type: TweetType,
-      resolve(parent) {
-        const option = {
-          where: {
-            id: parent.tweetId
-          }
-        };
-        return tweetRepository.findOne(option);
+      resolve(parent, _, { tweetLoaderById }) {
+        return tweetLoaderById.load(parent.tweetId);
       }
     },
     user: {
       type: UserType,
-      resolve(parent) {
-        const option = {
-          where: {
-            id: parent.userId
-          }
-        };
-        return userRepository.findOne(option);
+      resolve(parent, _, { userLoaderById }) {
+        return userLoaderById.load(parent.userId);
       }
     }
   })
 });
-
-const fetchConversation = async (parent, args) => {
-  const reply = await tweetRepository.findOne({
-    where: {
-      parentId: parent.id
-    },
-    order: [["id", "desc"]]
-  });
-  if (!reply) {
-    return [];
-  }
-  //
-  // if (args.userId) {
-  //   replies = replies.fliter(reply => {
-  //     return reply.userId === args.userId;
-  //   });
-  // }
-  //
-  const depth = args.depth ? args.depth : Number.MAX_SAFE_INTEGER;
-  const conversation = [reply];
-  while (conversation.length < depth) {
-    const child = await tweetRepository.findOne({
-      where: {
-        // userId: { $or: [parent.userId, reply.userId] },
-        parentId: conversation[conversation.length - 1].id
-      },
-      limit: 1
-    });
-    if (!child) {
-      break;
-    }
-    conversation.push(child);
-  }
-  return conversation;
-};
 
 const TweetType = new GraphQLObjectType({
   name: "Tweet",
@@ -91,74 +46,68 @@ const TweetType = new GraphQLObjectType({
     },
     user: {
       type: UserType,
-      resolve(parent) {
-        const option = {
-          where: {
-            id: parent.userId
-          }
-        };
-        return userRepository.findOne(option);
+      resolve(parent, _, { userLoaderById }) {
+        return userLoaderById.load(parent.userId);
       }
     },
     parent: {
       type: TweetType,
-      resolve(parent) {
+      resolve(parent, _, { tweetLoaderById }) {
         if (!parent.parentId) {
           return null;
         }
-        const option = {
-          where: {
-            id: parent.parentId
-          }
-        };
-        return tweetRepository.findOne(option);
+        return tweetLoaderById.load(parent.parentId);
       }
     },
     favorites: {
       type: new GraphQLList(FavoriteType),
-      resolve(parent) {
-        const option = {
-          where: {
-            tweetId: parent.id
-          }
-        };
-        return favoriteRepository.findAll(option);
+      resolve(parent, _, { favoriteLoaderByTweetId }) {
+        return favoriteLoaderByTweetId.load(parent.id);
       }
     },
     replies: {
       type: new GraphQLList(TweetType),
-      resolve(parent) {
-        const option = {
-          where: {
-            parentId: parent.id
-          }
-        };
-        return tweetRepository.findAll(option);
+      resolve(parent, _, { tweetLoaderByParentId }) {
+        return tweetLoaderByParentId.load(parent.id);
       }
     },
     conversation: {
-      type: new GraphQLList(TweetType),
+      type: new GraphQLList(new GraphQLList(TweetType)),
       args: {
         depth: {
+          type: GraphQLInt
+        },
+        limit: {
           type: GraphQLInt
         },
         userId: {
           type: GraphQLID
         }
       },
-      async resolve(parent, args) {
-        return fetchConversation(parent, args);
+      async resolve(parent, args, { conversationLoader }) {
+        const key = {
+          ...args,
+          parentId: parent.id
+        };
+        return conversationLoader.load(key);
       }
     },
     conversationLength: {
-      type: GraphQLInt,
+      type: new GraphQLList(GraphQLInt),
       args: {
+        limit: {
+          type: GraphQLInt
+        },
         userId: {
           type: GraphQLID
         }
       },
-      async resolve(parent, args) {
-        return (await fetchConversation(parent, args)).length;
+      async resolve(parent, args, { conversationLengthLoader }) {
+        const key = {
+          ...args,
+          parentId: parent.id
+        };
+        return conversationLengthLoader.load(key);
       }
     }
   })
@@ -187,8 +136,8 @@ const UserType = new GraphQLObjectType({
     },
     tweets: {
       type: new GraphQLList(TweetType),
-      resolve(parent, _) {
-        return tweetRepository.findAll(parent.id);
+      resolve(parent, _, { tweetLoaderByUserId }) {
+        return tweetLoaderByUserId.load(parent.id);
       }
     },
     subscription: {
@@ -204,44 +153,12 @@ const UserType = new GraphQLObjectType({
           type: GraphQLInt
         }
       },
-      async resolve(parent, args) {
-        const condition = {
-          userId: parent.id,
-          parentId: null
+      resolve(parent, args, { subscriptionBatchLoader }) {
+        const key = {
+          ...args,
+          userId: parent.id
         };
-        let orderDirection = "desc";
-        if (args.oldBefore && 0 < args.oldBefore) {
-          const baselineTweet = await tweetRepository.findOne({
-            where: {
-              id: args.oldBefore
-            }
-          });
-          if (baselineTweet.userId !== parent.id) {
-            return;
-          }
-          condition.id = {
-            $lt: baselineTweet.id
-          };
-        } else if (args.newAfter && 0 < args.newAfter) {
-          const baselineTweet = await tweetRepository.findOne({
-            where: {
-              id: args.newAfter
-            }
-          });
-          if (baselineTweet.userId !== parent.id) {
-            return;
-          }
-          condition.id = {
-            $gt: baselineTweet.id
-          };
-          orderDirection = "asc";
-        }
-        const tweets = await tweetRepository.findAll({
-          where: condition,
-          limit: args.limit,
-          order: [["id", orderDirection]]
-        });
-        return tweets;
+        return subscriptionBatchLoader.load(key);
       }
     }
   })

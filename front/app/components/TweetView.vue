@@ -18,21 +18,28 @@
       <TweetText :text="tweet.text"></TweetText>
       <div class="d-flex justify-space-between my-2 tools">
         <div class="d-flex align-center">
-          <v-btn icon x-small @click="dialogReply=true">
+          <v-btn icon x-small @click.stop="dialogReply = true">
             <v-icon>mdi-comment-outline</v-icon>
           </v-btn>
-          <span v-if="tweet.replies.length !== 0" class="ml-1">{{tweet.replies.length}}</span>
+          <span v-if="tweet.replies.length !== 0" class="ml-1">{{
+            tweet.replies.length
+          }}</span>
         </div>
-        <v-btn icon x-small>
+        <v-btn icon x-small @click.stop>
           <v-icon>mdi-twitter-retweet</v-icon>
         </v-btn>
         <div class="d-flex align-center">
-          <v-btn icon x-small @click="clickFavorite">
-            <v-icon :style="favoriteIconStyle" v-text="favoriteIconText"></v-icon>
+          <v-btn icon x-small @click.stop="clickFavorite">
+            <v-icon
+              :style="favoriteIconStyle"
+              v-text="favoriteIconText"
+            ></v-icon>
           </v-btn>
-          <span v-if="tweet.favorites.length !== 0" class="ml-1">{{tweet.favorites.length}}</span>
+          <span v-if="tweet.favorites.length !== 0" class="ml-1">{{
+            tweet.favorites.length
+          }}</span>
         </div>
-        <v-btn icon x-small>
+        <v-btn icon x-small @click.stop>
           <v-icon>mdi-upload-outline</v-icon>
         </v-btn>
       </div>
