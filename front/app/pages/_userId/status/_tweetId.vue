@@ -121,7 +121,6 @@ export default {
     currentUser: {
       query: query(null, user.current("id")),
       update(data) {
-        console.log(data);
         this.dataCurrentUser = data.currentUser;
       }
     },
@@ -155,27 +154,26 @@ export default {
         };
       },
       update(data) {
-        console.log(data);
         this.dataTweet = data.tweet;
       }
+    },
+    moreReplies: {
+      query: query(
+        { id: IDNonNullGQL },
+        tweet.findOne({ id: "id" }, ...replyParams())
+      ),
+      variables() {
+        return {
+          id: this.moreRepliesTweetId
+        };
+      },
+      update(data) {
+        this.dataMoreReplies = data.tweet;
+      },
+      skip() {
+        return !this.moreRepliesTweetId;
+      }
     }
-    // moreReplies: {
-    //   query: query(
-    //     { id: IDNonNullGQL },
-    //     tweet.findOne({ id: "id" }, ...replyParams())
-    //   ),
-    //   variables() {
-    //     return {
-    //       id: this.moreRepliesTweetId
-    //     };
-    //   },
-    //   update(data) {
-    //     this.dataMoreReplies = data.tweet;
-    //   },
-    //   skip() {
-    //     return !this.moreRepliesTweetId;
-    //   }
-    // }
   },
   data() {
     return {
