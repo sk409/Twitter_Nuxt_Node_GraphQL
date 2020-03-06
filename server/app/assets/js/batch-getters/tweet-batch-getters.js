@@ -34,18 +34,33 @@ const tweetBatchGetterByParentId = async parentIds => {
   });
 };
 
-const tweetBatchGetterByUserId = async userIds => {
-  const option = {
-    where: {
-      userId: {
-        $in: userIds
-      }
+const tweetBatchGetterByUserId = async keys => {
+  let orderDirection = "desc";
+  const where = {
+    userId: {
+      $in: keys.map(key => key.userId)
     }
+  };
+  if (keys[0].newAfter && 0 <= keys[0].newAfter) {
+    orderDirection = "asc";
+    where.id = {
+      $gt: keys[0].newAfter
+    };
+  }
+  if (keys[0].oldBefore && 0 <= keys[0].oldBefore) {
+    where.id = {
+      $lt: keys[0].oldBefore
+    };
+  }
+  const option = {
+    where,
+    order: [["id", orderDirection]],
+    limit: keys[0].limit
   };
   const tweets = await tweetRepository.findAll(option);
   const tweetGroups = _.groupBy(tweets, "userId");
   return new Promise(resolve => {
-    resolve(userIds.map(userId => tweetGroups[userId] || []));
+    resolve(keys.map(key => tweetGroups[key.userId] || []));
   });
 };
 

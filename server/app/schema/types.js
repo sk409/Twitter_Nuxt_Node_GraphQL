@@ -133,8 +133,23 @@ const UserType = new GraphQLObjectType({
     },
     tweets: {
       type: new GraphQLList(TweetType),
-      resolve(parent, _, { tweetLoaderByUserId }) {
-        return tweetLoaderByUserId.load(parent.id);
+      args: {
+        newAfter: {
+          type: GraphQLID
+        },
+        oldBefore: {
+          type: GraphQLID
+        },
+        limit: {
+          type: GraphQLInt
+        }
+      },
+      resolve(parent, args, { tweetLoaderByUserId }) {
+        const key = {
+          ...args,
+          userId: parent.id
+        };
+        return tweetLoaderByUserId.load(key);
       }
     },
     subscription: {

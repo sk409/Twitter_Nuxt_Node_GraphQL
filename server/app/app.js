@@ -61,6 +61,8 @@ app.use(
 app.use(
   "/graphql",
   (req, res, next) => {
+    console.log("===");
+    console.log(req.session);
     if (req.body.query) {
       console.log(req.body.query);
     }

@@ -19,13 +19,13 @@ export default {
     MenuView
   },
   apollo: {
-    fetch: {
+    user: {
       query: query(
         null,
         user.current("name", "id", "email", "profileImagePath")
       ),
       update(data) {
-        this.user = data.currentUser;
+        return data.currentUser;
       }
     }
   },

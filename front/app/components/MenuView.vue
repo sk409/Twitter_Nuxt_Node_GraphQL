@@ -9,17 +9,13 @@
         @click="$transition(menuItem.route)"
       >
         <v-icon v-if="menuItem.icon" class="icon" style="color:inherit;">
-          {{
-          menuItem.icon
-          }}
+          {{ menuItem.icon }}
         </v-icon>
         <div v-else-if="user" class="icon">
           <v-img contain :src="$serverUrl(user.profileImagePath)"></v-img>
         </div>
         <span class="ml-3 title" style="font-weight:bold;">
-          {{
-          menuItem.title
-          }}
+          {{ menuItem.title }}
         </span>
       </div>
     </div>
@@ -67,7 +63,7 @@ export default {
         },
         {
           title: "プロフィール",
-          route: this.$routes.profile.base(this.user.id)
+          route: this.$routes.profile.base(this.user.name)
         },
         {
           title: "もっと見る",
