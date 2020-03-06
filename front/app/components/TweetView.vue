@@ -2,7 +2,7 @@
   <div
     v-if="tweet"
     class="d-flex tweet-view"
-    @click="$router.push($routes.tweets.show(tweet.user.id, tweet.id))"
+    @click="$router.push($routes.tweets.show(tweet.user.name, tweet.id))"
   >
     <div class="d-flex flex-column header pl-1">
       <v-avatar>
@@ -21,9 +21,9 @@
           <v-btn icon x-small @click.stop="dialogReply = true">
             <v-icon>mdi-comment-outline</v-icon>
           </v-btn>
-          <span v-if="tweet.replies.length !== 0" class="ml-1">{{
-            tweet.replies.length
-          }}</span>
+          <span v-if="tweet.replies.length !== 0" class="ml-1">
+            {{ tweet.replies.length }}
+          </span>
         </div>
         <v-btn icon x-small @click.stop>
           <v-icon>mdi-twitter-retweet</v-icon>
@@ -35,9 +35,9 @@
               v-text="favoriteIconText"
             ></v-icon>
           </v-btn>
-          <span v-if="tweet.favorites.length !== 0" class="ml-1">{{
-            tweet.favorites.length
-          }}</span>
+          <span v-if="tweet.favorites.length !== 0" class="ml-1">
+            {{ tweet.favorites.length }}
+          </span>
         </div>
         <v-btn icon x-small @click.stop>
           <v-icon>mdi-upload-outline</v-icon>

@@ -1,7 +1,11 @@
 <template>
   <div>
     <div v-for="tweet in tweets" :key="tweet.id">
-      <TweetGroupTail :tweet="tweet" :user="user" @update:tweet="updateTweet"></TweetGroupTail>
+      <TweetGroupTail
+        :tweet="tweet"
+        :user="user"
+        @update:tweet="updateTweet"
+      ></TweetGroupTail>
       <v-divider></v-divider>
     </div>
     <div class="py-5 text-center">
@@ -75,7 +79,7 @@ export default {
     TweetGroupTail
   },
   apollo: {
-    fetchNewTweets: {
+    dataNewTweets: {
       query: query(
         { id: IDNonNullGQL, limit: IntNonNullGQL, newAfter: IDNonNullGQL },
         user.findOne(
@@ -96,13 +100,13 @@ export default {
         };
       },
       update(data) {
-        this.newTweets = data.user.subscription;
+        return data.user.subscription;
       },
       skip() {
         return !this.user || this.newAfter < 0;
       }
     },
-    fetchOldTweets: {
+    dataOldTweets: {
       query: query(
         { id: IDNonNullGQL, limit: IntNonNullGQL, oldBefore: IDNonNullGQL },
         user.findOne(
@@ -123,7 +127,7 @@ export default {
         };
       },
       update(data) {
-        this.oldTweets = data.user.subscription;
+        return data.user.subscription;
       },
       skip() {
         return !this.user;
@@ -132,10 +136,10 @@ export default {
   },
   data() {
     return {
+      dataNewTweets: [],
+      dataOldTweets: [],
       newAfter: -1,
-      newTweets: [],
       oldBefore: -1,
-      oldTweets: null,
       tweets: []
     };
   },
@@ -143,20 +147,26 @@ export default {
     onscroll = this.scroll;
   },
   watch: {
+    dataNewTweets() {
+      const copy = JSON.parse(JSON.stringify(this.dataNewTweets));
+      this.tweets = copy.reverse().concat(this.tweets);
+      this.$emit("update:fetchNew", false);
+    },
+    dataOldTweets() {
+      const copy = JSON.parse(JSON.stringify(this.dataOldTweets));
+      copy.forEach(tweet => {
+        if (tweet.conversation.length === 1) {
+          tweet.conversation = tweet.conversation[0];
+        }
+      });
+      this.tweets = this.tweets.concat(copy);
+    },
     fetchNew() {
       if (this.tweets.length === 0) {
         return;
       }
       this.newAfter = this.tweets[0].id;
-      this.$apollo.queries.fetchNewTweets.refetch();
-    },
-    newTweets() {
-      const copy = [...this.newTweets];
-      this.tweets = copy.reverse().concat(this.tweets);
-      this.$emit("update:fetchNew", false);
-    },
-    oldTweets() {
-      this.tweets = this.tweets.concat(this.oldTweets);
+      this.$apollo.queries.dataNewTweets.refetch();
     }
   },
   methods: {

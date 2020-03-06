@@ -45,13 +45,14 @@
           </div>
           <v-divider></v-divider>
         </div>
-        <TweetGroupHead
-          v-for="reply in tweet.replies"
-          :key="reply.id"
-          :tweet="reply"
-          :user="user"
-          @fetch-more-replies="fetchMoreReplies"
-        ></TweetGroupHead>
+        <div v-for="reply in tweet.replies" :key="reply.id">
+          <TweetGroupHead
+            :tweet="reply"
+            :user="user"
+            @fetch-more-replies="fetchMoreReplies"
+          ></TweetGroupHead>
+          <v-divider></v-divider>
+        </div>
       </v-card>
     </template>
   </ScaffoldView>
@@ -121,13 +122,13 @@ export default {
     TweetText
   },
   apollo: {
-    currentUser: {
+    user: {
       query: query(null, user.current("id")),
       update(data) {
-        this.dataCurrentUser = data.currentUser;
+        return data.currentUser;
       }
     },
-    tweet: {
+    dataTweet: {
       query: query(
         { id: IDNonNullGQL, depth: IntNonNullGQL },
         tweet.findOne(
@@ -152,15 +153,15 @@ export default {
       ),
       variables() {
         return {
-          id: 2029,
+          id: this.$route.params.tweetId,
           depth: 1
         };
       },
       update(data) {
-        this.dataTweet = data.tweet;
+        return data.tweet;
       }
     },
-    moreReplies: {
+    dataMoreReplies: {
       query: query(
         { id: IDNonNullGQL },
         tweet.findOne({ id: "id" }, ...replyParams())
@@ -171,7 +172,7 @@ export default {
         };
       },
       update(data) {
-        this.dataMoreReplies = data.tweet;
+        return data.tweet;
       },
       skip() {
         return !this.moreRepliesTweetId;
@@ -207,13 +208,26 @@ export default {
   },
   watch: {
     dataMoreReplies() {
+      const copy = JSON.parse(JSON.stringify(this.dataMoreReplies));
+      if (copy.conversation.length !== 0) {
+        copy.conversation = copy.conversation[0];
+      }
+      if (copy.conversationLength.length !== 0) {
+        copy.conversationLength = copy.conversationLength[0];
+      }
       const index = this.tweet.replies.findIndex(
         reply => reply.id === this.moreRepliesTweetId
       );
-      this.$set(this.tweet.replies, index, this.dataMoreReplies);
+      this.$set(this.tweet.replies, index, copy);
     },
     dataTweet() {
-      this.tweet = this.dataTweet;
+      const copy = JSON.parse(JSON.stringify(this.dataTweet));
+      copy.replies.forEach(reply => {
+        if (reply.conversation.length !== 0) {
+          reply.conversation = reply.conversation[0];
+        }
+      });
+      this.tweet = copy;
     },
     dataCurrentUser() {
       this.user = this.dataCurrentUser;

@@ -34,9 +34,12 @@ export default {
       validator: v => typeof v === "object" || v === null
     }
   },
-  data() {
-    return {
-      menuItems: [
+  computed: {
+    menuItems() {
+      if (!this.user) {
+        return [];
+      }
+      return [
         {
           title: "ホーム",
           icon: "mdi-home-outline",
@@ -63,14 +66,15 @@ export default {
           icon: "mdi-file-document-outline"
         },
         {
-          title: "プロフィール"
+          title: "プロフィール",
+          route: this.$routes.profile.base(this.user.id)
         },
         {
           title: "もっと見る",
           icon: "mdi-dots-horizontal-circle-outline"
         }
-      ]
-    };
+      ];
+    }
   },
   methods: {
     menuItemStyle(menuItem) {

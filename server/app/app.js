@@ -1,3 +1,4 @@
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const DataLoader = require("dataloader");
 const express = require("express");
@@ -33,6 +34,12 @@ const sequelize = new Sequelize(
 
 const app = express();
 app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
+app.use(bodyParser.json());
+app.use(
   cors({
     origin: "http://localhost:5555",
     credentials: true
@@ -53,6 +60,15 @@ app.use(
 );
 app.use(
   "/graphql",
+  (req, res, next) => {
+    if (req.body.query) {
+      console.log(req.body.query);
+    }
+    if (req.body.variables) {
+      console.log(req.body.variables);
+    }
+    next();
+  },
   graphqlHTTP((req, res) => ({
     context: {
       req,

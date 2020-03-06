@@ -1,7 +1,5 @@
 const graphql = require("graphql");
 
-const repositories = require("../repositories");
-
 const {
   GraphQLID,
   GraphQLInt,
@@ -9,7 +7,6 @@ const {
   GraphQLObjectType,
   GraphQLString
 } = graphql;
-const { favoriteRepository, userRepository, tweetRepository } = repositories;
 
 const FavoriteType = new GraphQLObjectType({
   name: "Favorite",

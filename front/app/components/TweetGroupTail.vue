@@ -1,13 +1,13 @@
 <template>
   <div>
     <TweetView
-      :line="tweet.conversation.length!==0"
+      :line="tweet.conversation.length !== 0"
       :tweet="tweet"
       :user="user"
       @update:tweet="updateTweet"
     ></TweetView>
-    <div v-if="tweet.conversation.length!==0">
-      <div v-if="tweet.conversation.length<=2">
+    <div v-if="tweet.conversation.length !== 0">
+      <div v-if="tweet.conversation.length <= 2">
         <TweetView
           v-for="reply in tweet.conversation"
           :key="reply.id"
@@ -25,12 +25,12 @@
         </div>
         <TweetView
           :line="true"
-          :tweet="tweet.conversation[tweet.conversation.length-2]"
+          :tweet="tweet.conversation[tweet.conversation.length - 2]"
           :user="user"
           @update:tweet="updateTweet"
         ></TweetView>
         <TweetView
-          :tweet="tweet.conversation[tweet.conversation.length-1]"
+          :tweet="tweet.conversation[tweet.conversation.length - 1]"
           :user="user"
           @update:tweet="updateTweet"
         ></TweetView>
@@ -38,7 +38,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import TweetView from "@/components/TweetView.vue";

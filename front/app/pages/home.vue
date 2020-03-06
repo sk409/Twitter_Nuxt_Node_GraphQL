@@ -4,9 +4,12 @@
       <v-card flat outlined class="w-100">
         <v-card-title>ホーム</v-card-title>
         <v-divider></v-divider>
-        <TweetForm :user="user" @created="fetchNew=true"></TweetForm>
+        <TweetForm :user="user" @created="fetchNew = true"></TweetForm>
         <div class="divider mt-2"></div>
-        <TweetSubscription :fetch-new.sync="fetchNew" :user="user"></TweetSubscription>
+        <TweetSubscription
+          :fetch-new.sync="fetchNew"
+          :user="user"
+        ></TweetSubscription>
       </v-card>
     </template>
   </ScaffoldView>
