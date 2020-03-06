@@ -4,6 +4,7 @@
       :line="tweet.conversation.length !== 0"
       :tweet="tweet"
       :user="user"
+      @created:reply="createdReply"
       @update:tweet="updateTweet"
     ></TweetView>
     <div v-if="tweet.conversation.length !== 0">
@@ -13,6 +14,7 @@
           :key="reply.id"
           :tweet="reply"
           :user="user"
+          @created:reply="createdReply"
           @update:tweet="updateTweet"
         ></TweetView>
       </div>
@@ -27,11 +29,13 @@
           :line="true"
           :tweet="tweet.conversation[tweet.conversation.length - 2]"
           :user="user"
+          @created:reply="createdReply"
           @update:tweet="updateTweet"
         ></TweetView>
         <TweetView
           :tweet="tweet.conversation[tweet.conversation.length - 1]"
           :user="user"
+          @created:reply="createdReply"
           @update:tweet="updateTweet"
         ></TweetView>
       </div>
@@ -56,6 +60,9 @@ export default {
     TweetView
   },
   methods: {
+    createdReply(reply) {
+      this.$emit("created:reply", reply);
+    },
     updateTweet(tweet) {
       this.$emit("update:tweet", tweet);
     }

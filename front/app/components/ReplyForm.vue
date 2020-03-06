@@ -2,7 +2,7 @@
   <div v-if="tweet && user">
     <v-card>
       <div class="px-3 py-2">
-        <v-btn color="primary" icon>
+        <v-btn color="primary" icon @click="$emit('cancel')">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </div>
@@ -19,12 +19,13 @@
           </div>
           <div class="ml-3">
             <div>
-              <span class="title">{{tweet.user.nickname}}</span>
-              <span class="caption">@{{tweet.user.name}}</span>
+              <span class="title">{{ tweet.user.nickname }}</span>
+              <span class="caption">@{{ tweet.user.name }}</span>
             </div>
-            <pre class="tweet-text">{{tweet.text}}</pre>
+            <pre class="tweet-text">{{ tweet.text }}</pre>
             <div class="my-3">
-              <span class="link">@{{tweet.user.name}}</span>へ返信
+              <span class="link">@{{ tweet.user.name }}</span
+              >へ返信
             </div>
           </div>
         </div>
@@ -35,9 +36,20 @@
             </v-avatar>
           </div>
           <div class="flex-fill">
-            <TweetInput v-model="text" placeholder="返信をツイート"></TweetInput>
+            <TweetInput
+              v-model="text"
+              placeholder="返信をツイート"
+            ></TweetInput>
             <div class="d-flex">
-              <v-btn color="primary" depressed rounded small class="ml-auto mr-2" @click="create">返信</v-btn>
+              <v-btn
+                color="primary"
+                depressed
+                rounded
+                small
+                class="ml-auto mr-2"
+                @click="create"
+                >返信</v-btn
+              >
             </div>
           </div>
         </div>
@@ -78,7 +90,21 @@ export default {
           userId: IDNonNullGQL,
           parentId: IDNonNullGQL
         },
-        tweet.store({ text: "text", userId: "userId", parentId: "parentId" })
+        tweet.store(
+          { text: "text", userId: "userId", parentId: "parentId" },
+          "id",
+          "text",
+          {
+            user: {
+              params: ["id", "name", "nickname", "profileImagePath"]
+            }
+          },
+          {
+            parent: {
+              params: ["id"]
+            }
+          }
+        )
       );
       const response = await this.$apollo.mutate({
         mutation: storeTweetGQL,
@@ -88,7 +114,7 @@ export default {
           parentId: this.tweet.id
         }
       });
-      console.log(response);
+      this.$emit("created", response.data.storeTweet);
     }
   }
 };

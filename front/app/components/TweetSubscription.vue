@@ -1,21 +1,28 @@
 <template>
   <div>
-    <div v-for="tweet in tweets" :key="tweet.id">
-      <TweetGroupTail
-        :tweet="tweet"
-        :user="user"
-        @update:tweet="updateTweet"
-      ></TweetGroupTail>
-      <v-divider></v-divider>
-    </div>
-    <div class="py-5 text-center">
-      <v-progress-circular color="primary" indeterminate></v-progress-circular>
-    </div>
+    <ScrollView @scroll:bottom="fetchOldTweets">
+      <div v-for="tweet in tweets" :key="tweet.id">
+        <TweetGroupTail
+          :tweet="tweet"
+          :user="user"
+          @created:reply="createdReply"
+          @update:tweet="updateTweet"
+        ></TweetGroupTail>
+        <v-divider></v-divider>
+      </div>
+      <div class="py-5 text-center">
+        <v-progress-circular
+          color="primary"
+          indeterminate
+        ></v-progress-circular>
+      </div>
+    </ScrollView>
   </div>
 </template>
 
 <script>
 import query from "@/apollo/query.js";
+import ScrollView from "@/components/ScrollView.vue";
 import TweetGroupTail from "@/components/TweetGroupTail.vue";
 import user from "@/apollo/models/user.js";
 import { IDNonNullGQL, IntNonNullGQL } from "@/apollo/types.js";
@@ -76,6 +83,7 @@ export default {
     }
   },
   components: {
+    ScrollView,
     TweetGroupTail
   },
   apollo: {
@@ -143,9 +151,6 @@ export default {
       tweets: []
     };
   },
-  created() {
-    onscroll = this.scroll;
-  },
   watch: {
     dataNewTweets() {
       const copy = JSON.parse(JSON.stringify(this.dataNewTweets));
@@ -162,22 +167,20 @@ export default {
       this.tweets = this.tweets.concat(copy);
     },
     fetchNew() {
+      this.fetchNewTweets();
+    }
+  },
+  methods: {
+    createdReply(reply) {},
+    fetchOldTweets() {
+      this.oldBefore = this.tweets[this.tweets.length - 1].id;
+    },
+    fetchNewTweets() {
       if (this.tweets.length === 0) {
         return;
       }
       this.newAfter = this.tweets[0].id;
       this.$apollo.queries.dataNewTweets.refetch();
-    }
-  },
-  methods: {
-    scroll() {
-      const scrollBottom =
-        document.documentElement.scrollTop +
-        document.documentElement.clientHeight;
-      if (scrollBottom !== document.documentElement.scrollHeight) {
-        return;
-      }
-      this.oldBefore = this.tweets[this.tweets.length - 1].id;
     },
     updateTweet(tweet) {
       const index = this.tweets.findIndex(t => t.id === tweet.id);

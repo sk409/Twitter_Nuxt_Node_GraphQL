@@ -1,38 +1,48 @@
 <template>
   <div>
     <TweetView
-      :line="tweet.conversation.length!==0"
+      :line="tweet.conversation.length !== 0"
       :tweet="tweet"
       :user="user"
+      @created:reply="createdReply"
       @update:tweet="updateTweet"
     ></TweetView>
-    <div v-if="tweet.conversation.length!==0">
+    <div v-if="tweet.conversation.length !== 0">
       <TweetView
-        :line="2<=tweet.conversationLength"
+        :line="2 <= tweet.conversationLength"
         :tweet="tweet.conversation[0]"
         :user="user"
+        @created:reply="createdReply"
         @update:tweet="updateTweet"
       ></TweetView>
-      <div v-if="2<=tweet.conversationLength">
-        <div v-if="!loading" @click="fetchMoreReplies" class="d-flex more-replies my-1">
+      <div v-if="2 <= tweet.conversationLength">
+        <div
+          v-if="!loading"
+          @click="fetchMoreReplies"
+          class="d-flex more-replies my-1"
+        >
           <div class="dot-line-container">
             <div class="dot-line"></div>
           </div>
-          <div class="link">他{{tweet.conversationLength-1}}件の返信</div>
+          <div class="link">他{{ tweet.conversationLength - 1 }}件の返信</div>
         </div>
         <div
           v-else-if="tweet.conversation.length !== tweet.conversationLength"
           class="text-center py-2"
         >
-          <v-progress-circular color="primary" indeterminate></v-progress-circular>
+          <v-progress-circular
+            color="primary"
+            indeterminate
+          ></v-progress-circular>
         </div>
         <div v-else>
           <TweetView
             v-for="(reply, index) in tweet.conversation.slice(1)"
             :key="reply.id"
-            :line="index!==tweet.conversation.length-2"
+            :line="index !== tweet.conversation.length - 2"
             :tweet="reply"
             :user="user"
+            @created:reply="createdReply"
             @update:tweet="updateTweet"
           ></TweetView>
         </div>
@@ -40,7 +50,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import TweetView from "@/components/TweetView.vue";
@@ -64,6 +73,9 @@ export default {
     };
   },
   methods: {
+    createdReply(reply) {
+      this.$emit("created:reply", reply);
+    },
     fetchMoreReplies() {
       this.loading = true;
       this.$emit("fetch-more-replies", this.tweet);

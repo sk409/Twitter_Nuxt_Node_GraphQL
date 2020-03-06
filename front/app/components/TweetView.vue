@@ -45,7 +45,12 @@
       </div>
     </div>
     <v-dialog v-model="dialogReply" width="60%">
-      <ReplyForm :tweet="tweet" :user="user"></ReplyForm>
+      <ReplyForm
+        :tweet="tweet"
+        :user="user"
+        @cancel="dialogReply = false"
+        @created="createdReply"
+      ></ReplyForm>
     </v-dialog>
   </div>
 </template>
@@ -140,6 +145,10 @@ export default {
           this.$emit("update:tweet", tweet);
         }
       }
+    },
+    createdReply(reply) {
+      this.dialogReply = false;
+      this.$emit("created:reply", reply);
     }
   }
 };

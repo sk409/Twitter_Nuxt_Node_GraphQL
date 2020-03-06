@@ -60,6 +60,7 @@ import ScrollView from "@/components/ScrollView.vue";
 import TweetView from "@/components/TweetView.vue";
 import user from "@/apollo/models/user.js";
 import {
+  IDGQL,
   IDNonNullGQL,
   IntNonNullGQL,
   StringNonNullGQL
@@ -136,7 +137,8 @@ export default {
         {
           name: StringNonNullGQL,
           oldBefore: IDNonNullGQL,
-          limit: IntNonNullGQL
+          limit: IntNonNullGQL,
+          parentId: IDGQL
         },
         user.findOne(
           { name: "name" },
@@ -148,7 +150,8 @@ export default {
             tweets: {
               args: {
                 oldBefore: "oldBefore",
-                limit: "limit"
+                limit: "limit",
+                parentId: "parentId"
               },
               params: [
                 "id",
@@ -177,7 +180,8 @@ export default {
         return {
           name: this.$route.params.username,
           oldBefore: this.oldBefore,
-          limit: fetchTweetSize
+          limit: fetchTweetSize,
+          parentId: null
         };
       },
       update(data) {
